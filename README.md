@@ -1,69 +1,103 @@
-# Hackflight: Simple quadcopter flight control firmware for C++ hackers
+<p align="center"> 
+<img src="extras/media/logo.png" width=450>
+</p>
 
-Hackflight is simple C++ firmware for inexpensive quadcopter flight
-controllers.  It is geared toward people like me who want to tinker with
-flight-control firmware, and use it to teach students about ideas like inertial
-measurement and PID tuning.  <b>If you are in the 99% percent of users who just
-want to get your vehicle flying without getting into firmware hacking, I
-recommend [Cleanflight](http://cleanflight.com/)</b> (great for getting started
-when you're on a budget) <b>or the
-[Ardupilot](http://copter.ardupilot.org/ardupilot/index.html) system</b> (for
-sophisticated mission planning with waypoint navigation and the like).  In
-addition to big user communities and loads of great features, these platforms
-have safety mechanisms that Hackflight lacks, which will help avoid injury to
-you and damage to your vehicle.
+## Intro
 
-Hackflight derives from the Baseflight firmware (which in turn derives from
-Multiwii), and currently works only on STM32F103 flight-controller boards
-(Naze32 and clones like Flip32, MultiRC, etc.) The original Hackflight idea was to
-write firmware for flight controllers built from the Arduino / Teensy hardware.
-As you'll see, the code follows the Arduino design pattern of a <tt>startup</tt>
-routine that calls the <tt>init()</tt> method of a few objects (<tt>IMU</tt>,
-<tt>RC</tt>, <tt>PID</tt>, <tt>Board</tt>) and a <tt>loop</tt> routine that
-calls the <tt>update()</tt> method and other methods of those objects.
-But with all the features you can now get onboard an inexpensive STM32F103
-board (barometer, magnetometer, flash RAM), there seems little point in building
-your own board, unless you're interested in hardware hacking.  So Hackflight currently
-supports only the STM32F103 boards, while keeping the Arduino design principles.  The 
-code provides abstraction (through the <tt>Board</tt> class) that should 
-make it easy to use on other boards.
+Hackflight is a simple, platform-independent, header-only C++ toolkit for
+building multirotor flight controllers.  It is geared toward people like
+me who want to tinker with flight-control firmware, and use it to teach
+students about ideas like inertial measurement and PID tuning.  <b>If you are
+in the 99% percent of users who just want to get your vehicle flying without
+getting into firmware hacking, I recommend
+[Betaflight](http://betaflight.com/)</b> (great for getting started when
+you're on a budget) <b>or the [Ardupilot](http://copter.ardupilot.org)
+system</b> (for sophisticated mission planning with waypoint navigation and the
+like).  In addition to big user communities and loads of great features, these
+platforms have safety mechanisms that Hackflight lacks, which will help avoid
+injury to you and damage to your vehicle.
 
-Meanwhile, to try Hackflight on your board, you'll need to be running Linux on your
-desktop/laptop computer, with the [GNU ARM
-toolchain](https://launchpad.net/gcc-arm-embedded) installed, and you'll need
-to grab the [BreezySTM32](https://github.com/simondlevy/BreezySTM32)
-repository.  
+## Supported platforms
 
-In <tt>hackflight/firmware/naze130mm</tt> there's code that uses PID values (<tt>pidvals.hpp</tt>)
-appropriate that worked well on my 130mm quadcopter.  Likewise, <tt>hackflight/firmware/naze250mm</tt> 
-contains code that uses values that worked on a 250mm quad.   So choose whichever is closest to your 
-vehicle, cd to that folder, and edit the Makeke to reflect where you put BreezySTM32. Then type <tt>make</tt>,
-which will build the firmware binary in the <tt>obj</tt> directory.  If you've
-already got Baseflight or Cleanflight running on your board, you should then
-just be able to type <tt>make flash</tt> to flash Hackflight onto it.  If you
-run into trouble, you can short the bootloader pins and type <tt>make unbrick</tt>.
+Hackflight is currently working on the following platforms:
 
-Hackflight flies your quadcopter in Level (a.k.a. Stable) mode.  So the only parameters you
-should need to adjust are the PID tuning params.
-As with Baseflight, you get a gyro auto-calibration sequence on startup, indicated by  steady
-green LED that turns off when the calibration is done.  You can re-calibrate
-the gyro by putting the collective (left) stick in full upper-left and the
-cyclic (right) in full center-down position.  You can calibrate the
-accelerometer with collective lower-left and cyclic center-down.  As usual, collective 
-lower-right arms the board, and lower-left disarms it, as indicated by the red LED.
-The green LED will flash when the board is tilted by more than 25 degrees.
+* [TinyPICO](https://www.tinypico.com)
 
-Although Hackflight was designed to be &ldquo;headless&rdquo; (no configurator program),
-it is useful to get some visual feedback on things like vehicle orientation and RC receiver
-PWM values.  So in the <tt>gcs</tt> folder you'll find a Python program (<tt>main.py</tt>)
-that allows you to connect to the board and see what's going on.  To use this program you'll
-need to install [MSPPG](https://github.com/simondlevy/MSPPG), a parser generator for the Multiwii Serial 
-Protocol (MSP) messages used by the firmware. Follow the directions in that repository to install
-MSPPG for Python.
+* [Ladybug Flight Controller](https://www.tindie.com/products/TleraCorp/ladybug-flight-controller/) from Tlera Corp
 
-If you find Hackflight useful, please consider donating
-to the [Baseflight](https://goo.gl/3tyFhz) or 
-[Cleanflight](https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=TSQKVT6UYKGL6)
-projects from which it is derived.
+* [Butterfly DIY](https://diydrones.com/profiles/blogs/hackhawk-ii-an-arduino-compatible-brushless-flight-controller)
+brushless flight controller (components from from Tlera Corp. and Pesky Products)
 
+* [MulticopterSim](https://github.com/simondlevy/MulticopterSim) flight simulator based on UnrealEngine4
 
+## Standard units
+
+By supporting floating-point operations, these platforms allow us to write
+simpler code based on standard units:
+
+* Distances in meters
+* Time in seconds
+* Quaternions in the interval [-1,+1]
+* Euler angles in radians
+* Accelerometer values in Gs
+* Barometric pressure in Pascals
+* Stick demands in the interval [-1,+1]
+* Motor demands in [0,1]
+
+## Design principles
+
+Thanks to some help from [Sytelus](https://github.com/sytelus), the core
+Hackflight
+[firmware](https://github.com/simondlevy/hackflight/tree/master/src)
+adheres to standard practices for C++, notably, short, simple methods and
+minimal use of compiler macros like <b>#ifdef</b> that can make it difficult to
+follow what the code is doing.  
+
+A typical Arduino sketch for hackflight is written as follows:
+
+1. Construct a ```Hackflight``` objecting using a ```Board```, ```Receiver```, and
+```Mixer``` object.
+
+2. Add sensors (```Gyrometer```, ```Quaternion```)
+
+3. Add PID controllers (```Rate```, ```Level```)
+
+4. In the ```loop()``` function, call ```Hackflight::update()```
+
+## RoboFirmwareToolkit
+
+Hackflight is built on top of
+[RoboFirmwareToolkit](https://github.com/simondlevy/RoboFirmwareToolkit) (RFT),
+a general-purpose toolkit for building robot firmware.  So before trying out Hackflight
+you should also install RFT.  It is also worth checking out the README for RFT in order
+to see some of the design principles supporting Hackflight (see also the note on PID
+controllers below.)
+
+## Ground Control Station
+
+Because it is useful to get some visual feedback on things like vehicle orientation and RC receiver
+channel values,  we also provide a very simple &ldquo;Ground Control Station&rdquo; (GCS) program
+that allows you to connect to the board and see what's going on. Windows users
+can run this program directly: just clone the [HackflightGCS](https://github.com/simondlevy/HackflightGCS)
+repository and double-click on <b>hackflight.exe</b>.  Others can run the
+<b>hackflight.py</b> Python script in the <b>extras/gcs/python</b> folder.  To
+run the Python script you'll need to install
+[MSPPG](https://github.com/simondlevy/RoboFirmwareToolkit/tree/master/extras/parser), a
+parser generator for the Multiwii Serial Protocol (MSP) messages used by the
+firmware. Follow the directions in that folder to install MSPPG for Python.
+
+## PID Controllers
+
+<b>A PID controller is not the same as a
+[flight mode](https://oscarliang.com/rate-acro-horizon-flight-mode-level/).</b>
+For example, so-called [Acro mode](http://ardupilot.org/copter/docs/acro-mode.html#acro-mode) 
+requires a PID controller based on angular
+velocity (a.k.a. rate, computed from the gyrometer) for each of the three angles
+(roll, pitch yaw). So-called [Stabilize](http://ardupilot.org/copter/docs/stabilize-mode.html#stabilize-mode) 
+mode requires these three angular-velocity controllers,
+plus a PID controller based on angle (computed from the quaternion) for the
+roll and pitch axes.   To support this arrangement in Hackflight, PID
+controllers for aux state 0 will also run in aux states 1 and 2, and PID
+controllers for aux state 1 will also run in aux state 2.
+
+<p align="center"> <img src="extras/media/pidcontrollers.png" width=600> </p>

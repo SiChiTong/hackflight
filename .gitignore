@@ -1,7 +1,10 @@
-*.so
-*.o
-*.swp
-*.pyc
-*~
+extras/gcs/python/hackflight
+extras/gcs/python/hackflight.zip
+obj/
 *#
-obj
+*.pro
+*.job
+*.swp
+*~
+~*
+
