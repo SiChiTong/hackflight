@@ -1,7 +1,5 @@
-*.so
-*.o
+#auto_saved_files
+#__pycache__/
 *.swp
-*.pyc
-*~
-*#
-obj
+.~lock*
+__*__.*

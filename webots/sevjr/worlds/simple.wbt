@@ -1,0 +1,44 @@
+#VRML_SIM R2025a utf8
+
+EXTERNPROTO "https://raw.githubusercontent.com/cyberbotics/webots/R2023b/projects/objects/backgrounds/protos/TexturedBackground.proto"
+EXTERNPROTO "https://raw.githubusercontent.com/cyberbotics/webots/R2023a/projects/objects/backgrounds/protos/TexturedBackgroundLight.proto"
+EXTERNPROTO "../protos/SevJr.proto"
+EXTERNPROTO "https://raw.githubusercontent.com/cyberbotics/webots/R2025a/projects/objects/floors/protos/UnevenTerrain.proto"
+
+WorldInfo {
+  title "Hackflight"
+  gravity 0
+  physics "simple"
+  contactProperties [
+    ContactProperties {
+      coulombFriction [
+        0.6
+      ]
+      bounce 0.4
+      bounceVelocity 0
+    }
+  ]
+}
+Viewpoint {
+  orientation -0.0585256153440152 0.9945952397058346 -0.08576165520264774 0.923495677231371
+  position -0.830722522796916 -0.0391641889536915 1.1529187172762594
+  follow "SevJr"
+}
+DEF robot SevJr {
+  hidden linearVelocity_0 -0.0008633270968665551 -0.0013719794450909885 0.1202862441907214
+  hidden angularVelocity_0 0.03662179342652386 -0.023014585976287406 8.974718464338595e-06
+  translation -2.7626467099729764e-05 -4.390334224291163e-05 0.003849159814103085
+  rotation 0.8466868091744212 -0.5320915373472683 0.00020749327186980648 0.0013840976260220995
+  prop_front_right_ccw_initial_rotation 0 0 0.9999999999999999 2.1101713989717052
+  prop_front_left_cw_initial_rotation 0 0 -0.9999999999999999 2.1101713989717052
+  prop_rear_cw_initial_rotation 0 0 1 4.855650614359166
+  rudder_initial_rotation -0.5353215638841871 0.6502720944277924 -0.5390519700818097 1.9945337394969567
+}
+TexturedBackground {
+}
+TexturedBackgroundLight {
+}
+UnevenTerrain {
+  translation 0 0 -3.08
+  size 500 500 5
+}

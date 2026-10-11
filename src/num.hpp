@@ -1,0 +1,50 @@
+/**
+ * Copyright (C) 2011-2022 Bitcraze AB, 2025 Simon D. Levy
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, in version 3.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program. If not, see <http://www.gnu.org/licenses/>.
+ */
+
+#pragma once
+
+#include <math.h>
+#include <stdint.h>
+#include <string.h>
+
+#include <datatypes.hpp>
+
+class Num {
+
+    public:
+
+        // Small number epsilon, to prevent dividing by zero
+        static constexpr float kEpsilon = 1e-6f;
+
+        static constexpr float kRad2Deg = 180.0f / M_PI;
+        static constexpr float kDeg2Rad = M_PI / 180.0f;
+
+        static auto ConstrainFloat(const float val, const float maxabs) -> float
+        {
+            return val < -maxabs ? -maxabs : val > maxabs ? maxabs : val;
+        }
+
+        static auto ConstrainFloat(const float value, const float min_val,
+                const float max_val) -> float
+        {
+            return fminf(max_val, fmaxf(min_val,value));
+        }
+
+        static auto Max(const float a, const float b) -> float
+        {
+            return a > b ? a : b;
+        }
+};

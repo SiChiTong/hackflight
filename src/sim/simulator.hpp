@@ -1,0 +1,137 @@
+/* 
+ * Platform-independent support for fast simulator loop (PID control and
+ * dynamics)
+ *
+ * Copyright (C) 2026 Simon D. Levy
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, in version 3.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program. If not, see <http:--www.gnu.org/licenses/>.
+ */
+
+#pragma once
+
+#include <stdio.h>
+#include <time.h>
+
+#include <datatypes.hpp>
+#include <num.hpp>
+#include <pidcontrol.hpp>
+#include <sim/datatypes.hpp>
+#include <sim/dynamics.hpp>
+
+namespace hf {
+
+    class Simulator {
+
+        private:
+
+            static constexpr float kDynamicsFreq = 1e5; // Hz
+            static constexpr float kPidFastFreq = 500; // 1024 Plank 
+            static constexpr float kPidSlowFreq = 100;
+
+        public:
+
+            Simulator() = default;
+
+            Simulator(const Pose & pose)
+                : dynamics_(Dynamics(pose)),
+                pid_controller_(PidController()) {}
+
+            Simulator(const Dynamics & dynamics,
+                    const PidController & pid_controller)
+                : dynamics_(dynamics), pid_controller_(pid_controller) {}
+
+            static auto Step(
+                    const Simulator & sim,
+                    const Mode mode,
+                    const Setpoint & setpoint,
+                    EffectorFun effector_fun,
+                    const VehicleParams & vehicle_params,
+                    const float framerate=32) -> Simulator 
+            {
+                const auto dt = 1/(float)kPidFastFreq;
+
+                auto pid_controller = sim.pid_controller_;
+
+                auto dynamics = sim.dynamics_;
+
+                // Run slow PID control in outer loop -------------------------
+                for (uint32_t i=0; i<kPidSlowFreq/framerate; ++i) {
+
+                    // Get vehicle state from dynamics and convert state values
+                    // from doubles/radians to floats/degrees for PID
+                    // controllers
+                    const auto state = SimStateToVehicleState(
+                            Dynamics::GetSimState(dynamics));
+
+                    // Run fast PID control and mixer in middle loop ----------
+                    for (uint32_t j=0; j<kPidFastFreq/kPidSlowFreq; ++j) {
+
+                        // Run PID control to get new setpoint
+                        pid_controller = PidController::Run(
+                                pid_controller,
+                                true,
+                                dt,
+                                mode,
+                                state,
+                                setpoint,
+                                PidController::kControlHover);
+
+                        // Run PID-control output through vehicle effector
+                        // dynamics to get thrust, roll, pitch, yaw forces
+                        const auto forces = effector_fun(
+                                PidController::GetSetpoint(pid_controller));
+
+                        // Run dynamics in inner loop -------------------------
+                        for (uint32_t k=0; k<kDynamicsFreq/kPidFastFreq; ++k) {
+                            dynamics = Dynamics::Update(dynamics,
+                                    vehicle_params, 1 / kDynamicsFreq, forces);
+                        }
+                    }
+                }
+
+                return Simulator(dynamics, pid_controller);
+            }
+
+            static auto GetSimState(const Simulator & sim)
+            {
+                return Dynamics::GetSimState(sim.dynamics_);
+            }
+
+            static auto GetSetpoint(const Simulator & sim)
+            {
+                return PidController::GetSetpoint(sim.pid_controller_);
+            }
+
+        private:
+
+            Dynamics dynamics_;
+
+            PidController pid_controller_;
+
+            static auto SimStateToVehicleState(
+                    const SimState state) -> VehicleState 
+            {
+                return VehicleState(
+                        (float)state.dx,
+                        (float)state.dy,
+                        (float)state.z,
+                        (float)state.dz,
+                        (float)(Num::kRad2Deg * state.phi),
+                        (float)(Num::kRad2Deg * state.dphi),
+                        (float)(Num::kRad2Deg * state.theta),
+                        (float)(Num::kRad2Deg * state.dtheta),
+                        (float)(Num::kRad2Deg * state.psi),
+                        (float)(Num::kRad2Deg * state.dpsi));
+            }
+    };
+}

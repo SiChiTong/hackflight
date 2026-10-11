@@ -1,0 +1,33 @@
+{
+  "TELEMETRY": 
+  [{"ID": 100},
+   {"comment": "mode should be byte, but easier if float"},
+   {"mode":   "float"},
+   {"volts":  "float"},
+   {"thrust": "float"},
+   {"roll":   "float"},
+   {"pitch":  "float"},
+   {"yaw":    "float"},
+   {"dx":     "float"},
+   {"dy":     "float"},
+   {"z":      "float"},
+   {"dz":     "float"},
+   {"phi":    "float"},
+   {"dphi":   "float"},
+   {"theta":  "float"},
+   {"dtheta": "float"},
+   {"psi":    "float"},
+   {"dpsi":   "float"}
+  ],
+
+  "SET_CHANNELS": 
+  [{"ID": 203},
+   {"throttle":  "short"},
+   {"roll":      "short"},
+   {"pitch":     "short"},
+   {"yaw":       "short"},
+   {"arm":       "short"},
+   {"hover":     "short"},
+   {"autopilot": "short"}
+  ]
+}

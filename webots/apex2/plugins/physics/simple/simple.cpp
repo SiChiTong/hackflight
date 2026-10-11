@@ -1,0 +1,45 @@
+/* 
+ * Custom physics plugin custom for Hackflight Webots-based simulator
+ *
+ *  Copyright (C) 2025 Simon D. Levy
+ *
+ *  This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, in version 3.
+ *
+ *  This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program. If not, see <http:--www.gnu.org/licenses/>.
+ */
+
+#include <sim/vehicles/quadx/apexquad.hpp>
+#include <plugin_helper.hpp>
+
+static PluginHelper * helper_;
+
+// This is called by Webots in the outer (display, kinematics) loop
+DLLEXPORT void webots_physics_step() 
+{
+    const auto message = PluginHelper::GetMessage();
+
+    const auto vparams = hf::ApexQuad::kVehicleParams;
+
+    const auto state = helper_->RunSimulator(hf::ApexQuad::Run, vparams,
+            message.mode, message.setpoint);
+
+    helper_->SetDbodyFromState(vparams, state);
+}
+
+DLLEXPORT void webots_physics_cleanup() 
+{
+    delete helper_;
+}
+
+DLLEXPORT void webots_physics_init() 
+{
+    helper_ = new PluginHelper();
+}

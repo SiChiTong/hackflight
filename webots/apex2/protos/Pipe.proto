@@ -1,0 +1,39 @@
+#VRML_SIM R2025a utf8
+
+#   Copyright (C) 2026 Simon D. Levy
+#
+#   This program is free software: you can redistribute it and/or modify
+#   it under the terms of the GNU General Public License as published by
+#   the Free Software Foundation, in version 3.
+#
+#   This program is distributed in the hope that it will be useful,
+#   but WITHOUT ANY WARRANTY without even the implied warranty of
+#   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+#   GNU General Public License for more details.
+#
+#   You should have received a copy of the GNU General Public License
+#   along with this program. If not, see <http:--www.gnu.org/licenses/>.
+
+EXTERNPROTO "https://raw.githubusercontent.com/cyberbotics/webots/released/projects/objects/solids/protos/SolidPipe.proto"
+
+PROTO Pipe [
+    field SFVec3f translation 0 0 0
+    field SFRotation rotation 0 0 0 0
+    field SFNode appearance PBRAppearance {
+        baseColorMap ImageTexture {
+            url [ "worlds/apex2/textures/light_asphalt.jpg" ] 
+        }
+        metalness 1.0
+            roughness 0.0 
+    }  
+]
+{
+    SolidPipe {
+        radius 0.5
+            thickness 0.05
+            height 5 
+            translation IS translation
+            rotation IS rotation
+            appearance IS appearance
+    }
+}
